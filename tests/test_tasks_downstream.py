@@ -1,9 +1,10 @@
+import socket
 from pathlib import Path
 
 import pytest
 from copier import copy
 from plumbum import ProcessExecutionError, local
-from plumbum.cmd import curl, docker_compose, invoke
+from plumbum.cmd import docker_compose, invoke
 from plumbum.machines.local import LocalCommand
 
 
@@ -119,16 +120,21 @@ def test_start(
             # Test normal call
             stdout = invoke("start")
             print(stdout)
-            assert "Starting" in stdout
-            assert "done" in stdout
+            assert "Reinitialized existing Git repository" in stdout
+            assert "pre-commit installed..." in stdout
+            assert "Status: Downloaded newer image for sosedoff/pgweb:latest" in stdout
             # Test "--debugpy and --wait" call
             invoke("stop")
             stdout = invoke("start", "--debugpy", "--wait")
-            assert "Starting" in stdout
-            assert "done" in stdout
-            curl_stdout = curl("127.0.0.1:12899")
-            assert "(52) Empty reply from server" not in curl_stdout
+            assert socket_is_open("127.0.0.1", supported_odoo_version * 1000 + 899)
     finally:
         # Imagine the user is in the odoo subrepo for this command
         with local.cwd(tmp_path / "odoo" / "custom" / "src" / "odoo"):
             invoke("stop", "--purge")
+
+
+def socket_is_open(host, port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if sock.connect_ex((host, port)) == 0:
+        return True
+    return False

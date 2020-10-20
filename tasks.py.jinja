@@ -9,7 +9,6 @@ Contains common helpers to develop using this child project.
 """
 import json
 import os
-import subprocess
 from logging import getLogger
 from itertools import chain
 from pathlib import Path
@@ -295,19 +294,16 @@ def start(c, detach=True, debugpy=False, wait=None):
         c.run(cmd, env=dict(UID_ENV, DOODBA_DEBUGPY_ENABLE=str(int(debugpy))))
     if wait:
         _logger.info("Waiting for services to spin up...")
-        curl_stdout = None
-        # Odoo
-        while(not curl_stdout):
-            curl_cmd = "curl 127.0.0.1:12069"
-            curl_stdout = subprocess.run(curl_cmd.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
-        _logger.info("Odoo started.")
-        # Debugpy
-        if debugpy:
-            while(not curl_stdout or "(52) Empty reply from server" in curl_stdout):
-                curl_cmd = "curl 127.0.0.1:12899"
-                curl_stdout = subprocess.run(curl_cmd.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
-            _logger.info("Debugpy started.")
-
+        debugpy_log = None
+        while(
+            not debugpy_log or
+            b"Adapter is accepting incoming client connections" not in debugpy_log
+        ):
+            debugpy_log = c.run(
+                "docker-compose exec -T odoo " \
+                "cat /opt/odoo/auto/debugpy-logs/debugpy.server-1.log"
+            ).stdout
+        _logger.info("Debugpy up.")
 
 @task(
     develop,
