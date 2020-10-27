@@ -285,7 +285,7 @@ def lint(c, verbose=False):
 
 
 @task(develop)
-def start(c, detach=True, debugpy=False, wait=None):
+def start(c, detach=True, debugpy=False, wait=False):
     """Start environment."""
     cmd = "docker-compose up"
     if detach:

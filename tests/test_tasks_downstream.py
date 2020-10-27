@@ -121,7 +121,7 @@ def test_start(
             stdout = invoke("start")
             print(stdout)
             assert "Reinitialized existing Git repository" in stdout
-            assert "pre-commit installed..." in stdout
+            assert "pre-commit installed" in stdout
             assert "Status: Downloaded newer image for sosedoff/pgweb:latest" in stdout
             # Test "--debugpy and --wait" call
             invoke("stop")
