@@ -20,7 +20,7 @@ services:
       SMTP_SERVER: smtplocal
       {%- endif %}
     depends_on:
-      - db
+      # - db
       {%- if smtp_relay_host %}
       - smtp
       {%- endif %}
@@ -45,15 +45,13 @@ services:
       ) }}
       {%- endif %}
 
-  {% if postgres_version -%}
-  db:
-    extends:
-      file: common.yaml
-      service: db
-    env_file:
-      - .docker/db-creation.env
-    restart: unless-stopped
-  {%- endif %}
+#  db:
+#    extends:
+#      file: common.yaml
+#      service: db
+#    env_file:
+#      - .docker/db-creation.env
+#    restart: unless-stopped
   {%- if smtp_relay_host %}
 
   smtp:
@@ -79,7 +77,7 @@ services:
       - .docker/db-access.env
     restart: unless-stopped
     depends_on:
-      - db
+    #  - db
       {%- if smtp_relay_host %}
       - smtp
       {%- endif %}
@@ -100,7 +98,7 @@ volumes:
   backup_cache:
   {%- endif %}
   filestore:
-  db:
+ # db:
   {%- if smtp_relay_host %}
   mailconfig:
   maildata:
