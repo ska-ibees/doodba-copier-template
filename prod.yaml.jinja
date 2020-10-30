@@ -20,7 +20,7 @@ services:
       SMTP_SERVER: smtplocal
       {%- endif %}
     depends_on:
-      - db
+     # - db
       {%- if smtp_relay_host %}
       - smtp
       {%- endif %}
